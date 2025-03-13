@@ -1,7 +1,6 @@
 pub mod syntax;
 pub mod syntax_facts;
 
-use std::any::Any;
 
 use syntax::{CloneableAny, Location, Span, SyntaxKind, Token, TokenStream};
 
