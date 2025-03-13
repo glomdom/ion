@@ -68,6 +68,15 @@ mod tests {
     }
 
     #[test]
+    fn lexes_null_literals() -> () {
+        let tokens = tokenize("null");
+        let token = tokens.first().unwrap();
+
+        assert_eq!(SyntaxKind::NullLiteral, token.kind);
+        assert_eq!(true, token.value.is_none());
+    }
+
+    #[test]
     fn lexes_bool_literals() -> () {
         let values = vec![("true", true), ("false", false)];
 
@@ -76,15 +85,7 @@ mod tests {
             let token = tokens.first().unwrap();
 
             assert_eq!(SyntaxKind::BoolLiteral, token.kind);
-            assert_eq!(
-                value,
-                *token // fuck rust
-                    .value
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<bool>()
-                    .unwrap()
-            );
+            assert_eq!(value, *token.downcast_value::<bool>().unwrap());
         }
     }
 
