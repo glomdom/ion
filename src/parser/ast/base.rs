@@ -1,6 +1,8 @@
+use std::fmt::Debug;
+
 use super::visitor::{ExpressionVisitor, StatementVisitor, SyntaxNodeVisitor};
 
-pub trait SyntaxNode {
+pub trait SyntaxNode: Debug + Clone {
     fn accept<R>(&self, visitor: &dyn SyntaxNodeVisitor<R>) -> R;
 }
 

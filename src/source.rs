@@ -1,8 +1,9 @@
 use pathdiff::diff_paths;
-use std::{fs, path::PathBuf, str::FromStr};
+use std::{fs, path::PathBuf, rc::Rc, str::FromStr};
 
 use crate::{
-    lexer::{syntax::Token, Lexer},
+    lexer::{syntax::TokenStream, Lexer},
+    parser::{ast::base::Expression, Parser},
     utility,
 };
 
@@ -29,8 +30,14 @@ impl SourceFile {
         }
     }
 
-    pub fn tokenize(self) -> Vec<Token> {
+    pub fn tokenize(self) -> TokenStream {
         let mut lexer = Lexer::new(self);
         lexer.tokenize()
+    }
+
+    pub fn parse(self) -> impl Expression {
+        let tokens = self.tokenize();
+        let mut parser = Parser::new(tokens);
+        parser.parse()
     }
 }

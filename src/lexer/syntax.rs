@@ -1,4 +1,7 @@
-use std::{any::Any, collections::HashSet, fmt};
+use std::{
+    any::{Any, TypeId},
+    fmt,
+};
 
 #[derive(Clone)]
 pub struct Location {
@@ -6,6 +9,17 @@ pub struct Location {
     pub line: usize,
     pub column: usize,
     pub position: usize,
+}
+
+impl Default for Location {
+    fn default() -> Self {
+        Self {
+            file_name: "<default>".to_string(),
+            line: 1,
+            column: 0,
+            position: 0,
+        }
+    }
 }
 
 impl fmt::Display for Location {
@@ -32,6 +46,15 @@ impl Span {
     }
 }
 
+impl Default for Span {
+    fn default() -> Self {
+        Self {
+            start: Location::default(),
+            end: Location::default(),
+        }
+    }
+}
+
 impl fmt::Display for Span {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} - {}", self.start, self.end)
@@ -44,15 +67,80 @@ impl fmt::Debug for Span {
     }
 }
 
+pub trait CloneableAny: Any {
+    fn clone_box<'a>(&'a self) -> Box<dyn CloneableAny>;
+}
+
+impl<T: Any + Clone> CloneableAny for T {
+    fn clone_box<'a>(&'a self) -> Box<dyn CloneableAny> {
+        Box::new(self.clone())
+    }
+}
+
+impl dyn CloneableAny {
+    #[inline]
+    pub fn downcast_ref<T: CloneableAny>(&self) -> Option<&T> {
+        if self.is::<T>() {
+            // SAFETY: just checked whether we are pointing to the correct type, and we can rely on
+            // that check for memory safety because we have implemented Any for all types; no other
+            // impls can exist as they would conflict with our impl.
+            unsafe { Some(self.downcast_ref_unchecked()) }
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    pub unsafe fn downcast_ref_unchecked<T: CloneableAny>(&self) -> &T {
+        debug_assert!(self.is::<T>());
+        // SAFETY: caller guarantees that T is the correct type
+        unsafe { &*(self as *const dyn CloneableAny as *const T) }
+    }
+
+    #[inline]
+    pub fn is<T: CloneableAny>(&self) -> bool {
+        // Get `TypeId` of the type this function is instantiated with.
+        let t = TypeId::of::<T>();
+
+        // Get `TypeId` of the type in the trait object (`self`).
+        let concrete = self.type_id();
+
+        // Compare both `TypeId`s on equality.
+        t == concrete
+    }
+}
+
 pub struct Token {
     pub kind: SyntaxKind,
     pub span: Span,
     pub text: String,
-    pub value: Option<Box<dyn Any>>,
+    pub value: Option<Box<dyn CloneableAny>>,
+}
+
+impl Clone for Token {
+    fn clone(&self) -> Self {
+        Self {
+            kind: self.kind,
+            span: self.span.clone(),
+            text: self.text.clone(),
+            value: self.value.as_deref().map(|b| b.clone_box()),
+        }
+    }
+}
+
+impl Default for Token {
+    fn default() -> Self {
+        Self {
+            kind: SyntaxKind::NullLiteral,
+            span: Span::default(),
+            text: "null".to_string(),
+            value: None,
+        }
+    }
 }
 
 impl Token {
-    pub fn downcast_value<T: 'static>(&self) -> Option<&T> {
+    pub fn downcast_value<T: CloneableAny + 'static>(&self) -> Option<&T> {
         self.value.as_ref().unwrap().downcast_ref::<T>()
     }
 }

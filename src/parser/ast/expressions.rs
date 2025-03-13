@@ -5,18 +5,18 @@ use super::{
     visitor::{ExpressionVisitor, SyntaxNodeVisitor},
 };
 
-#[derive(Debug)]
-pub struct Literal<'a> {
-    pub token: &'a Token,
+#[derive(Debug, Clone)]
+pub struct Literal {
+    pub token: Token,
 }
 
-impl<'a> SyntaxNode for Literal<'a> {
+impl SyntaxNode for Literal {
     fn accept<R>(&self, _visitor: &dyn SyntaxNodeVisitor<R>) -> R {
         todo!()
     }
 }
 
-impl<'a> Expression for Literal<'a> {
+impl Expression for Literal {
     fn accept<R>(&self, visitor: &dyn ExpressionVisitor<R>) -> R {
         visitor.visit_literal(self)
     }

@@ -3,7 +3,7 @@ pub mod syntax_facts;
 
 use std::any::Any;
 
-use syntax::{Location, Span, SyntaxKind, Token};
+use syntax::{CloneableAny, Location, Span, SyntaxKind, Token, TokenStream};
 
 use crate::source::SourceFile;
 
@@ -35,12 +35,12 @@ impl Lexer {
     }
 
     /// Tokenizes the entire source string, and returns a reference to the tokens vector
-    pub fn tokenize(&mut self) -> Vec<Token> {
+    pub fn tokenize(&mut self) -> TokenStream {
         while !self.is_finished() {
             self.lex();
         }
 
-        std::mem::take(&mut self.tokens)
+        TokenStream::new(std::mem::take(&mut self.tokens))
     }
 
     /// Lexes the current character, and pushes a token into `self.tokens` accordingly
@@ -181,7 +181,7 @@ impl Lexer {
     }
 
     /// Pushes a token into `self.tokens` using the current span and current lexeme
-    fn push_token(&mut self, kind: SyntaxKind, value: Option<Box<dyn Any>>) -> () {
+    fn push_token(&mut self, kind: SyntaxKind, value: Option<Box<dyn CloneableAny>>) -> () {
         let token = Token {
             kind,
             span: self.current_span(),
@@ -280,10 +280,8 @@ impl Lexer {
         }
 
         let current_lexeme = self.current_lexeme();
-        let value: Option<Box<dyn Any>> =
-            Some(Box::new(current_lexeme.trim_matches('"').to_owned()));
-
-        self.push_token(SyntaxKind::StringLiteral, value);
+        let value = current_lexeme.trim_matches('"').to_owned();
+        self.push_token(SyntaxKind::StringLiteral, Some(Box::new(value)));
     }
 
     fn read_number(&mut self) -> () {
