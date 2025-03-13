@@ -68,6 +68,43 @@ mod tests {
     }
 
     #[test]
+    fn lexes_bool_literals() -> () {
+        let values = vec![("true", true), ("false", false)];
+
+        for (input, value) in values {
+            let tokens = tokenize(input);
+            let token = tokens.first().unwrap();
+
+            assert_eq!(SyntaxKind::BoolLiteral, token.kind);
+            assert_eq!(
+                value,
+                *token // fuck rust
+                    .value
+                    .as_ref()
+                    .unwrap()
+                    .downcast_ref::<bool>()
+                    .unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn lexes_number_literals() -> () {
+        let values = vec![
+            ("123", SyntaxKind::IntLiteral, 123.0),
+            ("123.456", SyntaxKind::FloatLiteral, 123.456),
+        ];
+
+        for (input, kind, value) in values {
+            let tokens = tokenize(input);
+            let token = tokens.first().unwrap();
+
+            assert_eq!(kind, token.kind);
+            assert_eq!(value, *token.downcast_value::<f64>().unwrap());
+        }
+    }
+
+    #[test]
     fn lexes_keywords() -> () {
         assert_kinds(vec![
             ("let", SyntaxKind::LetKeyword),

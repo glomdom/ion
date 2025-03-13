@@ -292,7 +292,7 @@ impl Lexer {
                 panic!("malformed number literal");
             }
 
-            decimal_used = current_char_is_decimal;
+            decimal_used |= current_char_is_decimal;
             self.advance();
         }
 

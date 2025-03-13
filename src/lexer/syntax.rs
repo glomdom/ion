@@ -51,6 +51,12 @@ pub struct Token {
     pub value: Option<Box<dyn Any>>,
 }
 
+impl Token {
+    pub fn downcast_value<T: 'static>(&self) -> Option<&T> {
+        self.value.as_ref().unwrap().downcast_ref::<T>()
+    }
+}
+
 impl fmt::Debug for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut dbg = f.debug_struct("Token");
