@@ -158,13 +158,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source_file.cpp" />
     <ClCompile Include="syntax\location.cpp" />
     <ClCompile Include="syntax\span.cpp" />
     <ClCompile Include="syntax\token.cpp" />
     <ClCompile Include="syntax\token_stream.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lexer.h" />
+    <ClInclude Include="source_file.h" />
     <ClInclude Include="syntax\location.h" />
     <ClInclude Include="syntax\span.h" />
     <ClInclude Include="syntax\syntax_kind.h" />

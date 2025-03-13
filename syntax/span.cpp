@@ -1,4 +1,4 @@
 #include "span.h"
 
-span::span(location* start, location* end)
+span::span(const location& start, const location& end)
     : start(start), end(end) {}

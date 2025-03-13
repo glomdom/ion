@@ -4,8 +4,8 @@
 class span
 {
 public:
-    location* start;
-    location* end;
+    location start;
+    location end;
 
-    span(location* start, location* end);
+    span(const location& start, const location& end);
 };

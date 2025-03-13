@@ -5,6 +5,11 @@ token::token(syntax_kind kind, ::span span, std::string text)
 {
 }
 
+token::token(syntax_kind kind, ::span span, std::string text, value_t value)
+    : kind(kind), span(span), text(text), value(value)
+{
+}
+
 token::token(syntax_kind kind, ::span span, std::string text, std::string value)
     : kind(kind), span(span), text(text), value(value)
 {

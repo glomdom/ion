@@ -24,6 +24,12 @@ enum class syntax_kind : uint8_t
     equals_equals,
     bang_equals,
     colon,
+    l_paren,
+    r_paren,
+    l_brace,
+    r_brace,
+    l_bracket,
+    r_bracket,
 
     identifier,
     let_keyword,
