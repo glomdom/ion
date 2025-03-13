@@ -19,6 +19,18 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "unterminated string literal")]
+    fn panics_when_unterminated_string_literal() -> () {
+        tokenize("'abc");
+    }
+
+    #[test]
+    #[should_panic(expected = "malformed number literal")]
+    fn panics_when_malformed_number_literal() -> () {
+        tokenize("1.2.3");
+    }
+
+    #[test]
     fn skips_whitespaces_and_newlines() -> () {
         let tokens = tokenize("+    - \n  *  ");
         let plus = &tokens[0];
@@ -56,8 +68,16 @@ mod tests {
     }
 
     #[test]
+    fn lexes_keywords() -> () {
+        assert_kinds(vec![
+            ("let", SyntaxKind::LetKeyword),
+            ("fn", SyntaxKind::FnKeyword),
+        ]);
+    }
+
+    #[test]
     fn lexes_operators() -> () {
-        let cases = vec![
+        assert_kinds(vec![
             ("+", SyntaxKind::Plus),
             ("-", SyntaxKind::Minus),
             ("*", SyntaxKind::Star),
@@ -79,8 +99,10 @@ mod tests {
             ("==", SyntaxKind::EqualsEquals),
             ("!=", SyntaxKind::BangEquals),
             (":", SyntaxKind::Colon),
-        ];
+        ]);
+    }
 
+    fn assert_kinds(cases: Vec<(&str, SyntaxKind)>) -> () {
         for (input, expected_kind) in cases {
             let tokens = tokenize(input);
             let token = tokens.first().unwrap();
