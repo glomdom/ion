@@ -5,10 +5,8 @@ mod tests {
     use std::sync::atomic::AtomicUsize;
     use std::sync::atomic::Ordering;
 
-    use crate::{
-        lexer::syntax::{SyntaxKind, Token},
-        source::SourceFile,
-    };
+    use crate::lexer::syntax::TokenStream;
+    use crate::{lexer::syntax::SyntaxKind, source::SourceFile};
 
     static COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -33,11 +31,11 @@ mod tests {
     #[test]
     fn skips_whitespaces_and_newlines() -> () {
         let tokens = tokenize("+    - \n  *  ");
-        let plus = &tokens[0];
-        let minus = &tokens[1];
-        let star = &tokens[2];
+        let plus = &tokens.first();
+        let minus = &tokens.at(1);
+        let star = &tokens.at(2);
 
-        for token in &tokens {
+        for token in tokens.iter() {
             assert_eq!(1, token.span.len());
         }
 
@@ -60,7 +58,7 @@ mod tests {
 
         for input in cases {
             let tokens = tokenize(input);
-            let token = tokens.first().unwrap();
+            let token = tokens.first();
 
             assert_eq!(SyntaxKind::Identifier, token.kind);
             assert_eq!(input, token.text);
@@ -70,7 +68,7 @@ mod tests {
     #[test]
     fn lexes_null_literals() -> () {
         let tokens = tokenize("null");
-        let token = tokens.first().unwrap();
+        let token = tokens.first();
 
         assert_eq!(SyntaxKind::NullLiteral, token.kind);
         assert_eq!(true, token.value.is_none());
@@ -82,7 +80,7 @@ mod tests {
 
         for (input, value) in values {
             let tokens = tokenize(input);
-            let token = tokens.first().unwrap();
+            let token = tokens.first();
 
             assert_eq!(SyntaxKind::BoolLiteral, token.kind);
             assert_eq!(value, *token.downcast_value::<bool>().unwrap());
@@ -98,7 +96,7 @@ mod tests {
 
         for (input, kind, value) in values {
             let tokens = tokenize(input);
-            let token = tokens.first().unwrap();
+            let token = tokens.first();
 
             assert_eq!(kind, token.kind);
             assert_eq!(value, *token.downcast_value::<f64>().unwrap());
@@ -111,7 +109,7 @@ mod tests {
 
         for (input, value) in values {
             let tokens = tokenize(input);
-            let token = tokens.first().unwrap();
+            let token = tokens.first();
 
             assert_eq!(SyntaxKind::StringLiteral, token.kind);
             assert_eq!(value, *token.downcast_value::<String>().unwrap());
@@ -156,13 +154,13 @@ mod tests {
     fn assert_kinds(cases: Vec<(&str, SyntaxKind)>) -> () {
         for (input, expected_kind) in cases {
             let tokens = tokenize(input);
-            let token = tokens.first().unwrap();
+            let token = tokens.first();
 
             assert_eq!(expected_kind, token.kind);
         }
     }
 
-    fn tokenize(input: &str) -> Vec<Token> {
+    fn tokenize(input: &str) -> TokenStream {
         let path = env::current_dir()
             .expect("failed to find current working directory")
             .join(

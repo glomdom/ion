@@ -158,6 +158,22 @@ impl TokenStream {
         }
     }
 
+    pub fn iter(&self) -> std::slice::Iter<'_, Token> {
+        self.tokens.iter()
+    }
+
+    pub fn len(&self) -> usize {
+        self.tokens.len()
+    }
+
+    pub fn first(&self) -> &Token {
+        self.at(0)
+    }
+
+    pub fn at(&self, index: usize) -> &Token {
+        &self.tokens[index]
+    }
+
     pub fn consume(&mut self, kind: SyntaxKind) -> () {
         if self.is_finished() {
             panic!("Expected {:?}, got EOF", kind);
