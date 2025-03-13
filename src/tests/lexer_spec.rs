@@ -105,6 +105,19 @@ mod tests {
     }
 
     #[test]
+    fn lexes_string_literals() -> () {
+        let values = vec![("\"abc123\"", "abc123")];
+
+        for (input, value) in values {
+            let tokens = tokenize(input);
+            let token = tokens.first().unwrap();
+
+            assert_eq!(SyntaxKind::StringLiteral, token.kind);
+            assert_eq!(value, *token.downcast_value::<String>().unwrap());
+        }
+    }
+
+    #[test]
     fn lexes_keywords() -> () {
         assert_kinds(vec![
             ("let", SyntaxKind::LetKeyword),
