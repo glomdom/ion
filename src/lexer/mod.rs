@@ -1,7 +1,6 @@
 pub mod syntax;
 pub mod syntax_facts;
 
-
 use syntax::{CloneableAny, Location, Span, SyntaxKind, Token, TokenStream};
 
 use crate::source::SourceFile;
