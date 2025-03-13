@@ -124,6 +124,10 @@ impl Lexer {
                     return self.read_identifier_or_keyword();
                 }
 
+                if char.is_numeric() || char == '.' {
+                    return self.read_number();
+                }
+
                 panic!("unexpected character '{}'", char)
             }
         }
@@ -269,5 +273,30 @@ impl Lexer {
             Some(Box::new(current_lexeme.trim_matches('"').to_owned()));
 
         self.push_token(SyntaxKind::StringLiteral, value);
+    }
+
+    fn read_number(&mut self) -> () {
+        let mut decimal_used = false;
+        while !self.is_finished()
+            && (self.current_char().is_numeric() || self.current_char() == '.')
+        {
+            let current_char_is_decimal = self.current_char() == '.';
+            if decimal_used && current_char_is_decimal {
+                panic!("malformed number literal");
+            }
+
+            decimal_used = current_char_is_decimal;
+            self.advance();
+        }
+
+        let current_lexeme = self.current_lexeme();
+        let value = current_lexeme.parse::<f64>().unwrap_or(0.0);
+        let kind = if decimal_used {
+            SyntaxKind::FloatLiteral
+        } else {
+            SyntaxKind::IntLiteral
+        };
+
+        self.push_token(kind, Some(Box::new(value)));
     }
 }

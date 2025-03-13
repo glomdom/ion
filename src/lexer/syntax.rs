@@ -62,6 +62,10 @@ impl fmt::Debug for Token {
         if let Some(v) = &self.value {
             if let Some(s) = v.downcast_ref::<String>() {
                 dbg.field("value", &Some(s)); // Pass Some(s) directly
+            } else if let Some(s) = v.downcast_ref::<bool>() {
+                dbg.field("value", &Some(s));
+            } else if let Some(s) = v.downcast_ref::<f64>() {
+                dbg.field("value", &Some(s));
             } else {
                 dbg.field("value", &"Unknown Type");
             }
