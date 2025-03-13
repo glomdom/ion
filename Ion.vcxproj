@@ -175,6 +175,9 @@
     <ClInclude Include="syntax\token.h" />
     <ClInclude Include="syntax\token_stream.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="test.ion" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

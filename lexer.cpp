@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "lexer.h"
 
 lexer::lexer(const source_file& file)
@@ -27,6 +28,10 @@ void lexer::lex()
     case '/': return push_token(syntax_kind::slash);
     case '(': return push_token(syntax_kind::r_paren);
     case ')': return push_token(syntax_kind::l_paren);
+        
+    case '\'':
+    case '"': return read_string();
+        
     default:
         {
             if (std::isspace(character))
@@ -38,7 +43,7 @@ void lexer::lex()
             if (std::isdigit(character) || character == '.')
                 return read_number();
             
-            throw std::exception("Unexpected character '{}'");
+            throw std::runtime_error("Unexpected character '{}'");
         }
     }
 }
@@ -49,17 +54,11 @@ void lexer::read_identifier_or_keyword()
         advance();
 
     std::string lexeme = current_lexeme();
-    switch (lexeme)
-    {
-    case "true":
-    case "false":
+    if (lexeme == "true" || lexeme == "false")
         return push_token(syntax_kind::bool_literal, lexeme == "true");
 
-    case "null":
+    if (lexeme == "null")
         return push_token(syntax_kind::null_literal);
-
-    default: ;
-    }
 
     // TODO: keywords
     push_token(syntax_kind::identifier);
@@ -106,7 +105,7 @@ span lexer::current_span() const
 
 location lexer::current_location() const
 {
-    return location(lexeme_start_location.file_name, position, column, line);
+    return location(lexeme_start_location.file_name, line, column, position);
 }
 
 char lexer::current_char() const

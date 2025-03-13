@@ -26,14 +26,14 @@ size_t token_stream::size() const
 void token_stream::consume(syntax_kind kind)
 {
     if (is_eof())
-        throw std::exception(std::format("Expected {}, got EOF", kind).c_str());
+        throw std::runtime_error(std::format("Expected {}, got EOF", kind).c_str());
 
     token token = advance();
     if (token.kind == kind) return;
-    throw std::exception(std::format("Expected {}, got {}", kind, token.kind).c_str());
+    throw std::runtime_error(std::format("Expected {}, got {}", kind, token.kind).c_str());
 }
 
-bool token_stream::match(syntax_kind kind)
+bool token_stream::match(const syntax_kind kind)
 {
     if (check(kind))
     {

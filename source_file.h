@@ -11,6 +11,6 @@ public:
 
     explicit source_file(const std::string& file_path);
 
-    static token_stream tokenize();
-    // static expression parse();
+    [[nodiscard]] token_stream tokenize() const;
+    // expression parse();
 };
