@@ -1,4 +1,4 @@
-use std::{any::Any, fmt};
+use std::{any::Any, collections::HashSet, fmt};
 
 #[derive(Clone)]
 pub struct Location {
@@ -54,6 +54,85 @@ pub struct Token {
 impl Token {
     pub fn downcast_value<T: 'static>(&self) -> Option<&T> {
         self.value.as_ref().unwrap().downcast_ref::<T>()
+    }
+}
+
+pub struct TokenStream {
+    tokens: Vec<Token>,
+    position: usize,
+}
+
+impl TokenStream {
+    pub fn new(tokens: Vec<Token>) -> Self {
+        TokenStream {
+            tokens,
+            position: 0,
+        }
+    }
+
+    pub fn consume(&mut self, kind: SyntaxKind) -> () {
+        if self.is_finished() {
+            panic!("Expected {:?}, got EOF", kind);
+        }
+
+        let token = self.advance();
+        if token.kind == kind {
+            return;
+        }
+
+        panic!("Expected {:?}, got {:?}", kind, token.kind);
+    }
+
+    pub fn match_kind(&mut self, kind: SyntaxKind) -> bool {
+        if self.check_kind(kind) {
+            self.advance();
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn check_set(&mut self, kinds: Vec<SyntaxKind>) -> bool {
+        self.check_set_at_offset(kinds, 0)
+    }
+
+    pub fn check_set_at_offset(&mut self, kinds: Vec<SyntaxKind>, offset: usize) -> bool {
+        kinds
+            .iter()
+            .any(|kind| self.check_kind_at_offset(*kind, offset))
+    }
+
+    pub fn check_kind(&mut self, kind: SyntaxKind) -> bool {
+        self.check_kind_at_offset(kind, 0)
+    }
+
+    pub fn check_kind_at_offset(&mut self, kind: SyntaxKind, offset: usize) -> bool {
+        !self.is_finished() && self.peek(offset).kind == kind
+    }
+
+    pub fn current(&self) -> &Token {
+        self.peek(0)
+    }
+
+    pub fn peek(&self, offset: usize) -> &Token {
+        &self.tokens[self.position + offset]
+    }
+
+    pub fn peek_previous(&self, offset: usize) -> &Token {
+        &self.tokens[self.position - offset]
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.is_finished_at_offset(0)
+    }
+
+    pub fn is_finished_at_offset(&self, offset: usize) -> bool {
+        self.position + offset >= self.tokens.len()
+    }
+
+    pub fn advance(&mut self) -> &Token {
+        self.position += 1;
+        self.peek_previous(1)
     }
 }
 
