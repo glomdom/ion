@@ -178,6 +178,6 @@ mod tests {
             Err(e) => panic!("failed to remove test file: {}", e),
         }
 
-        source_file.tokenize()
+        source_file.tokenize().tokens
     }
 }

@@ -146,7 +146,7 @@ impl Token {
 }
 
 pub struct TokenStream {
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     position: usize,
 }
 
