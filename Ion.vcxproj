@@ -162,12 +162,14 @@
     <ClCompile Include="syntax\location.cpp" />
     <ClCompile Include="syntax\span.cpp" />
     <ClCompile Include="syntax\token.cpp" />
+    <ClCompile Include="syntax\token_stream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="syntax\location.h" />
     <ClInclude Include="syntax\span.h" />
     <ClInclude Include="syntax\syntax_kind.h" />
     <ClInclude Include="syntax\token.h" />
+    <ClInclude Include="syntax\token_stream.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
