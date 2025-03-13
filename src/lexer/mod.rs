@@ -145,11 +145,15 @@ impl Lexer {
         }
 
         let current_lexeme = self.current_lexeme();
-        if current_lexeme == "true" || current_lexeme == "false" {
-            return self.push_token(
-                SyntaxKind::BoolLiteral,
-                Some(Box::new(current_lexeme == "true")),
-            );
+        match current_lexeme.as_str() {
+            "true" | "false" => {
+                return self.push_token(
+                    SyntaxKind::BoolLiteral,
+                    Some(Box::new(current_lexeme == "true")),
+                )
+            }
+            "null" => return self.push_token(SyntaxKind::NullLiteral, None),
+            _ => (),
         }
 
         let keyword_kind = syntax_facts::get_keyword_kind(&current_lexeme);
