@@ -1,14 +1,12 @@
 pub mod syntax;
 pub mod syntax_facts;
 
-use std::any::Any;
-
 use syntax::{CloneableAny, Location, Span, SyntaxKind, Token, TokenStream};
 
 use crate::source::SourceFile;
 
 pub struct Lexer {
-    source: String,
+    source: Vec<char>,
     tokens: Vec<Token>,
     lexeme_start_location: Location,
     position: usize,
@@ -19,7 +17,7 @@ pub struct Lexer {
 impl Lexer {
     pub fn new(file: SourceFile) -> Lexer {
         Self {
-            source: file.source,
+            source: file.source.chars().collect(),
             tokens: Vec::new(),
 
             lexeme_start_location: Location {
@@ -194,7 +192,9 @@ impl Lexer {
 
     fn current_lexeme(&self) -> String {
         let span = self.current_span();
-        self.source[span.start.position..span.end.position].to_string()
+        self.source[span.start.position..span.end.position]
+            .iter()
+            .collect()
     }
 
     /// Returns a Span representing the lexeme start location to the current location
@@ -221,9 +221,14 @@ impl Lexer {
         self.peek_char(0)
     }
 
-    /// Returns the character at the given offset from the current position
+    /// Returns the character at the given offset from the current position.
+    /// Returns null terminator if out of bounds
     fn peek_char(&self, offset: usize) -> char {
-        self.source.chars().nth(self.position + offset).unwrap()
+        if self.is_finished_at_offset(offset) {
+            '\0'
+        } else {
+            self.source[self.position + offset]
+        }
     }
 
     /// Returns whether the current character matched the expected character

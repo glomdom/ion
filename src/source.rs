@@ -1,5 +1,5 @@
 use pathdiff::diff_paths;
-use std::{fs, path::PathBuf, rc::Rc, str::FromStr};
+use std::{fs, path::PathBuf, str::FromStr};
 
 use crate::{
     lexer::{syntax::TokenStream, Lexer},
