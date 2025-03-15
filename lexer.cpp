@@ -153,7 +153,7 @@ void lexer::lex()
     case ']': return push_token(syntax_kind::r_bracket);
         
     case '\'':
-    case '"': return read_string();
+    case '"': return read_string(character);
         
     default:
         {
@@ -166,7 +166,7 @@ void lexer::lex()
             if (std::isdigit(character) || character == '.')
                 return read_number();
             
-            throw std::runtime_error("Unexpected character '{}'");
+            throw std::runtime_error(std::format("Unexpected character {}", character));
         }
     }
 }
@@ -187,8 +187,17 @@ void lexer::read_identifier_or_keyword()
     push_token(syntax_kind::identifier);
 }
 
-void lexer::read_string()
+void lexer::read_string(const char terminator)
 {
+    while (is_eof() && current_char() != terminator)
+        advance();
+
+    if (const bool terminated = match_char(terminator); !terminated)
+        throw std::runtime_error("Unterminated string literal");
+
+    const std::string lexeme = current_lexeme();
+    std::string value = lexeme.substr(1, lexeme.length() - 2);
+    push_token(syntax_kind::string_literal, value);
 }
 
 void lexer::read_number()

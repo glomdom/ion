@@ -15,7 +15,7 @@ public:
 
     token first();
     token at(size_t pos);
-    [[nodiscard]] size_t size() const;
+    [[nodiscard]] size_t length() const;
     void consume(syntax_kind kind);
     bool match(syntax_kind kind);
     bool check_set(std::set<syntax_kind> kinds, size_t offset = 0);

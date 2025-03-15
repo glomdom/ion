@@ -18,7 +18,7 @@ token token_stream::at(const size_t pos)
     return tokens.at(pos);
 }
 
-size_t token_stream::size() const
+size_t token_stream::length() const
 {
     return tokens.size();
 }
@@ -76,5 +76,5 @@ token token_stream::peek(const size_t offset)
 
 bool token_stream::is_eof(const size_t offset) const
 {
-    return position + offset >= size();
+    return position + offset >= length();
 }

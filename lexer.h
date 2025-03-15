@@ -16,7 +16,7 @@ class lexer
 
     void lex();
     void read_identifier_or_keyword();
-    void read_string();
+    void read_string(char terminator);
     void read_number();
     void skip_whitespace();
     void push_token(syntax_kind kind, const token::value_t& value = NULL);
