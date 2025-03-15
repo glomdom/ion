@@ -4,6 +4,8 @@
 #include <iostream>
 #include <ostream>
 
+#include "syntax/syntax_facts.h"
+
 lexer::lexer(const source_file& file)
     : source(file.source), lexeme_start_location(location::empty(file.path))
 {
@@ -186,8 +188,9 @@ void lexer::read_identifier_or_keyword()
     if (lexeme == "null")
         return push_token(syntax_kind::null_literal);
 
-    // TODO: keywords
-    push_token(syntax_kind::identifier);
+    const auto keyword_kind = get_keyword_kind(lexeme);
+    const auto kind = keyword_kind.has_value() ? keyword_kind.value() : syntax_kind::identifier;
+    push_token(kind);
 }
 
 void lexer::read_string(const char terminator)

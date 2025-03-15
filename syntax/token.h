@@ -16,12 +16,12 @@ public:
     std::string text;
     value_t value = nullptr;
 
-    token(syntax_kind kind, ::span span, std::string text);
-    token(syntax_kind kind, ::span span, std::string text, value_t value);
-    token(syntax_kind kind, ::span span, std::string text, std::string value);
-    token(syntax_kind kind, ::span span, std::string text, bool value);
-    token(syntax_kind kind, ::span span, std::string text, int value);
-    token(syntax_kind kind, ::span span, std::string text, float value);
+    token(syntax_kind kind, ::span span, const std::string& text);
+    token(syntax_kind kind, ::span span, const std::string& text, value_t value);
+    token(syntax_kind kind, ::span span, const std::string& text, std::string value);
+    token(syntax_kind kind, ::span span, const std::string& text, bool value);
+    token(syntax_kind kind, ::span span, const std::string& text, int value);
+    token(syntax_kind kind, ::span span, const std::string& text, float value);
 };
 
 inline std::string to_string(const token::value_t& value)
@@ -46,13 +46,15 @@ inline std::string to_string(const token::value_t& value)
         return string_value;
     } catch (const std::bad_variant_access&) {}
 
-    try {
-        auto empty_value = std::get<std::monostate>(value);
-        return "null";
-    } catch (const std::bad_variant_access&) {}
-
     return "null";
 }
+
+template <>
+struct std::formatter<token::value_t> : std::formatter<std::string_view> {
+    auto format(const token::value_t& value, std::format_context& ctx) const {
+        return std::formatter<std::string_view>::format(::to_string(value), ctx);
+    }
+};
 
 inline std::string to_string(token token)
 {
