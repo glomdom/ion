@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <format>
 
-token_stream::token_stream(const std::vector<token>& tokens)
+token_stream::token_stream(const std::vector<token>& tokens) noexcept
     : tokens(tokens)
 {
 }

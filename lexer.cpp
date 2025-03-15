@@ -1,6 +1,9 @@
 #include <stdexcept>
 #include "lexer.h"
 
+#include <iostream>
+#include <ostream>
+
 lexer::lexer(const source_file& file)
     : source(file.source), lexeme_start_location(location::empty(file.path))
 {
@@ -24,26 +27,26 @@ void lexer::lex()
     {
     case '+':
         {
-        auto kind = syntax_kind::plus;
-        if (match_char('='))
-            kind = syntax_kind::plus_equals;
-            
-        return push_token(kind);
+            auto kind = syntax_kind::plus;
+            if (match_char('='))
+                kind = syntax_kind::plus_equals;
+
+            return push_token(kind);
         }
     case '-':
         {
-        auto kind = syntax_kind::minus;
-        if (match_char('='))
-            kind = syntax_kind::minus_equals;
-            
-        return push_token(kind);
+            auto kind = syntax_kind::minus;
+            if (match_char('='))
+                kind = syntax_kind::minus_equals;
+
+            return push_token(kind);
         }
     case '*':
         {
             auto kind = syntax_kind::star;
             if (match_char('='))
                 kind = syntax_kind::star_equals;
-            
+
             return push_token(kind);
         }
     case '/':
@@ -57,7 +60,7 @@ void lexer::lex()
             }
             else if (match_char('='))
                 kind = syntax_kind::slash_equals;
-            
+
             return push_token(kind);
         }
     case '^':
@@ -65,7 +68,7 @@ void lexer::lex()
             auto kind = syntax_kind::star;
             if (match_char('='))
                 kind = syntax_kind::star_equals;
-            
+
             return push_token(kind);
         }
     case '%':
@@ -73,7 +76,7 @@ void lexer::lex()
             auto kind = syntax_kind::percent;
             if (match_char('='))
                 kind = syntax_kind::percent_equals;
-            
+
             return push_token(kind);
         }
     case '~':
@@ -81,7 +84,7 @@ void lexer::lex()
             auto kind = syntax_kind::tilde;
             if (match_char('='))
                 kind = syntax_kind::tilde_equals;
-            
+
             return push_token(kind);
         }
     case '&':
@@ -95,7 +98,7 @@ void lexer::lex()
             }
             else if (match_char('='))
                 kind = syntax_kind::ampersand_equals;
-            
+
             return push_token(kind);
         }
     case '|':
@@ -109,7 +112,7 @@ void lexer::lex()
             }
             else if (match_char('|'))
                 kind = syntax_kind::ampersand_equals;
-            
+
             return push_token(kind);
         }
     case '=':
@@ -117,7 +120,7 @@ void lexer::lex()
             auto kind = syntax_kind::equals;
             if (match_char('='))
                 kind = syntax_kind::equals_equals;
-            
+
             return push_token(kind);
         }
     case '!':
@@ -125,7 +128,7 @@ void lexer::lex()
             auto kind = syntax_kind::bang;
             if (match_char('='))
                 kind = syntax_kind::bang_equals;
-            
+
             return push_token(kind);
         }
     case '<':
@@ -133,7 +136,7 @@ void lexer::lex()
             auto kind = syntax_kind::lt;
             if (match_char('='))
                 kind = syntax_kind::lte;
-            
+
             return push_token(kind);
         }
     case '>':
@@ -141,7 +144,7 @@ void lexer::lex()
             auto kind = syntax_kind::gt;
             if (match_char('='))
                 kind = syntax_kind::gte;
-            
+
             return push_token(kind);
         }
     case ':': return push_token(syntax_kind::colon);
@@ -151,10 +154,10 @@ void lexer::lex()
     case '}': return push_token(syntax_kind::r_brace);
     case '[': return push_token(syntax_kind::l_bracket);
     case ']': return push_token(syntax_kind::r_bracket);
-        
+
     case '\'':
     case '"': return read_string(character);
-        
+
     default:
         {
             if (std::isspace(character))
@@ -165,7 +168,7 @@ void lexer::lex()
 
             if (std::isdigit(character) || character == '.')
                 return read_number();
-            
+
             throw std::runtime_error(std::format("Unexpected character {}", character));
         }
     }
@@ -189,7 +192,7 @@ void lexer::read_identifier_or_keyword()
 
 void lexer::read_string(const char terminator)
 {
-    while (is_eof() && current_char() != terminator)
+    while (!is_eof() && current_char() != terminator)
         advance();
 
     if (const bool terminated = match_char(terminator); !terminated)
@@ -202,14 +205,42 @@ void lexer::read_string(const char terminator)
 
 void lexer::read_number()
 {
+    const auto malformed_message = "Malformed number literal";
+    bool decimal_used = peek_char(-1) == '.';
+    while (!is_eof() && (std::isdigit(current_char()) || current_char() == '.'))
+    {
+        const bool current_is_decimal = current_char() == '.';
+        if (decimal_used && current_is_decimal)
+            throw std::runtime_error(malformed_message);
+
+        decimal_used |= current_is_decimal;
+        advance();
+    }
+
+    const std::string lexeme = current_lexeme();
+    if (lexeme == ".")
+        throw std::runtime_error(malformed_message);
+
+    const auto kind = decimal_used ? syntax_kind::float_literal : syntax_kind::int_literal;
+    try
+    {
+        const double value = std::stod(lexeme);
+        push_token(kind, value);
+    }
+    catch (const std::invalid_argument& e)
+    {
+        throw std::runtime_error("Invalid number (compiler error): " + std::string(e.what()));
+    } catch (const std::out_of_range& e)
+    {
+        throw std::runtime_error("Number literal out of range: " + std::string(e.what()));
+    }
 }
 
 void lexer::skip_whitespace()
 {
     while (!is_eof() && std::isspace(current_char()))
     {
-        char current = current_char();
-        if (current == '\n')
+        if (const char current = current_char(); current == '\n')
             advance_new_line();
         else
             advance();
@@ -232,12 +263,12 @@ std::string lexer::current_lexeme() const
 span lexer::current_span() const
 {
     const location end_location = current_location();
-    return span(lexeme_start_location, end_location);
+    return {lexeme_start_location, end_location};
 }
 
 location lexer::current_location() const
 {
-    return location(lexeme_start_location.file_name, line, column, position);
+    return {lexeme_start_location.file_name, line, column, position};
 }
 
 char lexer::current_char() const

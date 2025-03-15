@@ -9,12 +9,12 @@
 class token
 {
 public:
-    using value_t = std::variant<std::monostate, int, float, bool, std::string>;
+    using value_t = std::variant<std::monostate, int, double, bool, std::string>;
     
     syntax_kind kind;
     span span;
     std::string text;
-    value_t value = NULL;
+    value_t value = nullptr;
 
     token(syntax_kind kind, ::span span, std::string text);
     token(syntax_kind kind, ::span span, std::string text, value_t value);
@@ -24,9 +24,39 @@ public:
     token(syntax_kind kind, ::span span, std::string text, float value);
 };
 
+inline std::string to_string(const token::value_t& value)
+{
+    try {
+        const auto double_value = std::get<double>(value);
+        return std::to_string(double_value);
+    } catch (const std::bad_variant_access&) {}
+
+    try {
+        const auto int_value = std::get<int>(value);
+        return std::to_string(int_value);
+    } catch (const std::bad_variant_access&) {}
+
+    try {
+        const auto bool_value = std::get<bool>(value);
+        return std::to_string(bool_value);
+    } catch (const std::bad_variant_access&) {}
+
+    try {
+        auto string_value = std::get<std::string>(value);
+        return string_value;
+    } catch (const std::bad_variant_access&) {}
+
+    try {
+        auto empty_value = std::get<std::monostate>(value);
+        return "null";
+    } catch (const std::bad_variant_access&) {}
+
+    return "null";
+}
+
 inline std::string to_string(token token)
 {
-    return std::format("{}: {} {}    {}", token.kind, token.text, NULL, token.span);
+    return std::format("{}: {} | {}    {}", token.kind, token.text, to_string(token.value), token.span);
 }
 
 template <>

@@ -11,7 +11,7 @@ class token_stream
 public:
     std::vector<token> tokens;
 
-    explicit token_stream(const std::vector<token>& tokens);
+    explicit token_stream(const std::vector<token>& tokens) noexcept;
 
     token first();
     token at(size_t pos);

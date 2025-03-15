@@ -2,6 +2,8 @@
 #include <sstream>
 #include "source_file.h"
 
+#include <iostream>
+
 #include "lexer.h"
 
 source_file::source_file(const std::string& file_path)
@@ -9,7 +11,7 @@ source_file::source_file(const std::string& file_path)
     std::ifstream input_file(file_path);
     if (!input_file)
         throw std::runtime_error("Could not open source file!");
-    
+
     std::stringstream buffer;
     buffer << input_file.rdbuf();
 
