@@ -4,7 +4,8 @@
 
 enum class syntax_kind : uint16_t
 {
-    plus, // operators
+    // operators/symbols
+    plus,
     minus,
     star,
     slash,
@@ -16,6 +17,18 @@ enum class syntax_kind : uint16_t
     pipe,
     ampersand_ampersand,
     pipe_pipe,
+    plus_equals,
+    minus_equals,
+    star_equals,
+    slash_equals,
+    slash_slash_equals,
+    percent_equals,
+    carat_equals,
+    tilde_equals,
+    ampersand_equals,
+    pipe_equals,
+    ampersand_ampersand_equals,
+    pipe_pipe_equals,
     bang,
     lt,
     lte,
@@ -32,11 +45,13 @@ enum class syntax_kind : uint16_t
     l_bracket,
     r_bracket,
 
+    // keywords
     identifier,
     let_keyword,
     fn_keyword,
 
-    string_literal, // literals
+    // literals
+    string_literal,
     int_literal,
     float_literal,
     bool_literal,
@@ -59,6 +74,18 @@ inline std::string to_string(const syntax_kind kind)
     case syntax_kind::pipe: return "pipe";
     case syntax_kind::ampersand_ampersand: return "ampersand_ampersand";
     case syntax_kind::pipe_pipe: return "pipe_pipe";
+    case syntax_kind::plus_equals: return "plus_equals";
+    case syntax_kind::minus_equals: return "minus_equals";
+    case syntax_kind::star_equals: return "star_equals";
+    case syntax_kind::slash_equals: return "slash_equals";
+    case syntax_kind::slash_slash_equals: return "slash_slash_equals";
+    case syntax_kind::percent_equals: return "percent_equals";
+    case syntax_kind::carat_equals: return "carat_equals";
+    case syntax_kind::tilde_equals: return "tilde_equals";
+    case syntax_kind::ampersand_equals: return "ampersand_equals";
+    case syntax_kind::pipe_equals: return "pipe_equals";
+    case syntax_kind::ampersand_ampersand_equals: return "ampersand_ampersand_equals";
+    case syntax_kind::pipe_pipe_equals: return "pipe_pipe_equals";
     case syntax_kind::bang: return "bang";
     case syntax_kind::lt: return "lt";
     case syntax_kind::lte: return "lte";
@@ -87,8 +114,10 @@ inline std::string to_string(const syntax_kind kind)
 }
 
 template <>
-struct std::formatter<syntax_kind> : std::formatter<std::string_view> {
-    auto format(const syntax_kind kind, std::format_context& ctx) const {
+struct std::formatter<syntax_kind> : std::formatter<std::string_view>
+{
+    auto format(const syntax_kind kind, std::format_context& ctx) const
+    {
         return std::formatter<std::string_view>::format(to_string(kind), ctx);
     }
 };

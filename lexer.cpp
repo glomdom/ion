@@ -22,12 +22,135 @@ void lexer::lex()
 
     switch (character)
     {
-    case '+': return push_token(syntax_kind::plus);
-    case '-': return push_token(syntax_kind::minus);
-    case '*': return push_token(syntax_kind::star);
-    case '/': return push_token(syntax_kind::slash);
-    case '(': return push_token(syntax_kind::r_paren);
-    case ')': return push_token(syntax_kind::l_paren);
+    case '+':
+        {
+        auto kind = syntax_kind::plus;
+        if (match_char('='))
+            kind = syntax_kind::plus_equals;
+            
+        return push_token(kind);
+        }
+    case '-':
+        {
+        auto kind = syntax_kind::minus;
+        if (match_char('='))
+            kind = syntax_kind::minus_equals;
+            
+        return push_token(kind);
+        }
+    case '*':
+        {
+            auto kind = syntax_kind::star;
+            if (match_char('='))
+                kind = syntax_kind::star_equals;
+            
+            return push_token(kind);
+        }
+    case '/':
+        {
+            auto kind = syntax_kind::slash;
+            if (match_char('/'))
+            {
+                kind = syntax_kind::slash_slash;
+                if (match_char('='))
+                    kind = syntax_kind::slash_slash_equals;
+            }
+            else if (match_char('='))
+                kind = syntax_kind::slash_equals;
+            
+            return push_token(kind);
+        }
+    case '^':
+        {
+            auto kind = syntax_kind::star;
+            if (match_char('='))
+                kind = syntax_kind::star_equals;
+            
+            return push_token(kind);
+        }
+    case '%':
+        {
+            auto kind = syntax_kind::percent;
+            if (match_char('='))
+                kind = syntax_kind::percent_equals;
+            
+            return push_token(kind);
+        }
+    case '~':
+        {
+            auto kind = syntax_kind::tilde;
+            if (match_char('='))
+                kind = syntax_kind::tilde_equals;
+            
+            return push_token(kind);
+        }
+    case '&':
+        {
+            auto kind = syntax_kind::ampersand;
+            if (match_char('&'))
+            {
+                kind = syntax_kind::ampersand_ampersand;
+                if (match_char('='))
+                    kind = syntax_kind::ampersand_ampersand_equals;
+            }
+            else if (match_char('='))
+                kind = syntax_kind::ampersand_equals;
+            
+            return push_token(kind);
+        }
+    case '|':
+        {
+            auto kind = syntax_kind::pipe;
+            if (match_char('|'))
+            {
+                kind = syntax_kind::pipe_pipe;
+                if (match_char('='))
+                    kind = syntax_kind::pipe_pipe_equals;
+            }
+            else if (match_char('|'))
+                kind = syntax_kind::ampersand_equals;
+            
+            return push_token(kind);
+        }
+    case '=':
+        {
+            auto kind = syntax_kind::equals;
+            if (match_char('='))
+                kind = syntax_kind::equals_equals;
+            
+            return push_token(kind);
+        }
+    case '!':
+        {
+            auto kind = syntax_kind::bang;
+            if (match_char('='))
+                kind = syntax_kind::bang_equals;
+            
+            return push_token(kind);
+        }
+    case '<':
+        {
+            auto kind = syntax_kind::lt;
+            if (match_char('='))
+                kind = syntax_kind::lte;
+            
+            return push_token(kind);
+        }
+    case '>':
+        {
+            auto kind = syntax_kind::gt;
+            if (match_char('='))
+                kind = syntax_kind::gte;
+            
+            return push_token(kind);
+        }
+    case ':': return push_token(syntax_kind::colon);
+    case '(': return push_token(syntax_kind::l_paren);
+    case ')': return push_token(syntax_kind::r_paren);
+    case '{': return push_token(syntax_kind::l_brace);
+    case '}': return push_token(syntax_kind::r_brace);
+    case '[': return push_token(syntax_kind::l_bracket);
+    case ']': return push_token(syntax_kind::r_bracket);
         
     case '\'':
     case '"': return read_string();
@@ -53,7 +176,7 @@ void lexer::read_identifier_or_keyword()
     while (!is_eof() && (std::isalnum(current_char()) || current_char() == '_'))
         advance();
 
-    std::string lexeme = current_lexeme();
+    const std::string lexeme = current_lexeme();
     if (lexeme == "true" || lexeme == "false")
         return push_token(syntax_kind::bool_literal, lexeme == "true");
 
